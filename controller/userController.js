@@ -1,7 +1,8 @@
 const bcrypt = require('bcryptjs');
 const asyncHandler = require('express-async-handler');
 const validateEmail = require('../services/authService');
-const db = require('../config/connectDB');
+const db = require('../database/initDB');
+const { QueryTypes } = require('sequelize');
 
 
 // Create a user account
@@ -14,7 +15,6 @@ const createUser = asyncHandler(async (req, res) => {
         throw new Error("Please add all required fields");
     }
 
-
     // Email validation
     if (!validateEmail(username)) {
         res.status(400);
@@ -22,31 +22,38 @@ const createUser = asyncHandler(async (req, res) => {
     }
 
     // Email existence validation
-    let [rows, fields] = [];
-    [rows, fields] = await db.query("SELECT * FROM User WHERE `username` = ?", [username]);
-    if (Object.keys(rows).length > 0) {         // Email already exist
+    let rows = await db.users.findOne({ where: { username: username, }, });
+    // [rows, fields] = await db.query("SELECT * FROM User WHERE `username` = ?", [username]);
+    if (rows !== null) {        // Email already exist
         res.status(400);
         throw new Error("Username exist");
-    }
+    };
 
 
     // Create Date info
-    const date = new Date;
-    const account_created = date.toISOString();
-    const account_updated = account_created;
+    // const date = new Date;
+    // const account_created = date.toISOString();
+    // const account_updated = account_created;
 
     // Encrypt password
     const salt = await bcrypt.genSalt(8);
     const savedPassword = await bcrypt.hash(password, salt);
 
     // Create user and add to database
-    [rows, fields] = await db.query("INSERT INTO User (`first_name`, `last_name`, `password`, `username`, `account_created`, `account_updated`) VALUES (?,?,?,?,?,?)",
-        [first_name, last_name, savedPassword, username, account_created, account_updated]);
+    rows = await db.users.create({
+        first_name,
+        last_name,
+        password: savedPassword,
+        username,
+    });
+    // [rows, fields] = await db.query("INSERT INTO User (`first_name`, `last_name`, `password`, `username`, `account_created`, `account_updated`) VALUES (?,?,?,?,?,?)",
+    //     [first_name, last_name, savedPassword, username, account_created, account_updated]);
 
 
     // Response
+    const { id, account_created, account_updated } = rows.dataValues;
     res.status(201).json({
-        first_name, last_name, username, account_created, account_updated,
+        id, first_name, last_name, username, account_created, account_updated,
     });
 });
 
@@ -58,7 +65,14 @@ const getUser = asyncHandler(async (req, res) => {
     const { userId } = req.params;
 
     // Query account info by id (no password)
-    const [rows, fields] = await db.query("SELECT `id`, `first_name`, `last_name`, `username`, `account_created`, `account_updated` FROM User WHERE `id` = ?", [userId]);
+    let rows = await db.sequelize.query(
+        "SELECT `id`, `first_name`, `last_name`, `username`, `account_created`, `account_updated` FROM `Users` WHERE `id` = ?",
+        {
+            replacements: [userId],
+            type: QueryTypes.SELECT,
+        },
+    );
+    // const [rows, fields] = await db.query("SELECT `id`, `first_name`, `last_name`, `username`, `account_created`, `account_updated` FROM User WHERE `id` = ?", [userId]);
 
     // Response
     const { id, first_name, last_name, username, account_created, account_updated } = rows[0];
@@ -89,12 +103,22 @@ const updateUser = asyncHandler(async (req, res) => {
     const savedPassword = await bcrypt.hash(password, salt);
 
     // Date info
-    const date = new Date;
-    const account_updated = date.toISOString();
+    // const date = new Date;
+    // const account_updated = date.toISOString();
 
     // Update database
-    const [rows, fields] = await db.query("UPDATE User SET `first_name` = ?, `last_name` = ?, `password` = ?, `account_updated` = ? WHERE `id` = ?",
-        [first_name, last_name, savedPassword, account_updated, userId]);
+    await db.users.update(
+        {
+            first_name,
+            last_name,
+            password: savedPassword
+        },
+        {
+            where: { id: userId }
+        }
+    );
+    // const [rows, fields] = await db.query("UPDATE User SET `first_name` = ?, `last_name` = ?, `password` = ?, `account_updated` = ? WHERE `id` = ?",
+    //     [first_name, last_name, savedPassword, account_updated, userId]);
 
     // Response
     res.status(204).json();
