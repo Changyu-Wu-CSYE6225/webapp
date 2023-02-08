@@ -1,7 +1,6 @@
 // Product Controller
 const asyncHandler = require('express-async-handler');
 const db = require('../database/initDB');
-// const { QueryTypes } = require('sequelize');
 
 
 // Get a product
@@ -45,7 +44,7 @@ const createProduct = asyncHandler(async (req, res) => {
     }
 
     // Check quantity availability
-    if (quantity < '0' || quantity > '100' || quantity - Math.floor(quantity) !== 0) {
+    if (typeof quantity === 'string' || quantity < 0 || quantity > 100 || quantity - Math.floor(quantity) !== 0) {
         res.status(400);
         throw new Error("Quantity must be an Integer in the range [0, 100]");
     }
@@ -93,10 +92,10 @@ const updateProduct = asyncHandler(async (req, res) => {
         }
     }
 
-    // Check quantity availability
-    if (quantity < '0' || quantity > '100' || quantity - Math.floor(quantity) !== 0) {
+    // Check quantity availability (No String, [0, 100], No decimal)
+    if (typeof quantity === 'string' || quantity < 0 || quantity > 100 || quantity - Math.floor(quantity) !== 0) {
         res.status(400);
-        throw new Error("Quantity must be in the range [0, 100]");
+        throw new Error("Quantity must be an Integer in the range [0, 100]");
     }
 
 
@@ -137,9 +136,9 @@ const patchProduct = asyncHandler(async (req, res) => {
     }
 
     // Check quantity availability
-    if (quantity && (quantity < '0' || quantity > '100' || quantity - Math.floor(quantity) !== 0)) {
+    if (quantity && (typeof quantity === 'string' || quantity < 0 || quantity > 100 || quantity - Math.floor(quantity) !== 0)) {
         res.status(400);
-        throw new Error("Quantity must be in the range [0, 100]");
+        throw new Error("Quantity must be an Integer in the range [0, 100]");
     }
 
 

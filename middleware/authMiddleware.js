@@ -14,33 +14,27 @@ const protectUser = asyncHandler(async (req, res, next) => {
 
     const encoded = req.headers.authorization.split(' ')[1];        // Extract Base64 auth
     const decoded = Buffer.from(encoded, 'base64').toString();      // Decode auth. Default: UTF-8
-    const auth_username = decoded.split(':')[0];
+    const username = decoded.split(':')[0];
     const auth_password = decoded.split(':')[1];
 
-    // Get username and password from database
-    const { userId } = req.params;
-    // const [rows, fields] = await db.query("SELECT `username`, `password` FROM User WHERE `id` = ?", [userId]);
-    const rows = await db.sequelize.query(
-        "SELECT `username`, `password` FROM `Users` WHERE `id` = ?",
-        {
-            replacements: [userId],
-            type: QueryTypes.SELECT,
-        },
-    );
-    if (Object.keys(rows).length <= 0) {
-        res.status(400);
-        throw new Error("Unauthorized. User not found");
+    // User authentication
+    let rows = await db.users.findOne({
+        where: { username: username },
+        raw: true,
+    });
+    if (rows === null) {    // User Validation
+        res.status(401);
+        throw new Error('Unauthenticated. User not found');
+    }
+    if (!await bcrypt.compare(auth_password, rows.password)) {  // Password Validation
+        res.status(401);
+        throw new Error("Unauthenticated. Password not match");
     }
 
-    // Validation
-    const { username, password } = rows[0];
-    if (username !== auth_username) {
+    // Check userId
+    if (req.params.userId != rows.id) {
         res.status(403);
-        throw new Error('Username not match');
-    }
-    if (!await bcrypt.compare(auth_password, password)) {
-        res.status(401);
-        throw new Error("Password not match");
+        throw new Error("Unauthorized. User id not match");
     }
 
     next();
@@ -66,22 +60,18 @@ const protectProduct = asyncHandler(async (req, res, next) => {
         where: { username: auth_username },
         raw: true,      // Disable wrapping 
     });
-    if (rows === null) {    // No user found
+    if (rows === null) {    // User Validation
         res.status(401);
-        throw new Error("Unauthorized. User not found");
+        throw new Error("Unauthenticated. User not found");
     }
-
-    // Validation
-    const { password } = rows;
-    if (!await bcrypt.compare(auth_password, password)) {
+    if (!await bcrypt.compare(auth_password, rows.password)) {  // Password Validation
         res.status(401);
-        throw new Error("Password not match");
+        throw new Error("Unauthenticated. Password not match");
     }
 
 
     // Product Permission check (if params contain productId)
     const userId = rows.id;
-    req.userId = userId;
     const { productId } = req.params;
     if (productId) {
         // Check Product Existence
@@ -102,8 +92,11 @@ const protectProduct = asyncHandler(async (req, res, next) => {
             res.status(403);
             throw new Error("User id is not matched with this product. Product is not created by this user");
         }
-        req.rows = rows;        // Pass to next as a parameter
     }
+
+    // Pass to next as a parameter
+    req.userId = userId;
+    req.rows = rows;
 
     next();
 });
