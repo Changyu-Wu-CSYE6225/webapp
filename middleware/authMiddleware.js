@@ -77,7 +77,7 @@ const protectProduct = asyncHandler(async (req, res, next) => {
         // Check Product Existence
         rows = await db.products.findOne({ where: { id: productId } });
         if (rows === null) {
-            res.status(400);
+            res.status(404);
             throw new Error("Product not found");
         }
 
