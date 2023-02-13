@@ -5,7 +5,7 @@ const app = require('../server');
 describe('Test healthz', () => {
     it('should return nothing', async () => {
         const response = await request(app).get('/healthz');
-        expect(response.statusCode).toBe(400);
+        expect(response.statusCode).toBe(200);
     });
 });
 
