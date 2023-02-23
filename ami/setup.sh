@@ -7,7 +7,7 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
 nvm install 16.17.1
-node -e "console.log('Running Node.js ' + process.version)"
+# node -e "console.log('Running Node.js ' + process.version)"
 
 # install mysql, setup root password, create database
 sudo yum install https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm -y
@@ -30,7 +30,7 @@ chown -R ec2-user:ec2-user /home/ec2-user/webapp
 chmod -R 755 /home/ec2-user/webapp
 
 # Install dependencies
-cd /home/ec2-user/webapp/
+cd /home/ec2-user/webapp/ || exit
 npm install
 
 # Set up autorun using Systemd
