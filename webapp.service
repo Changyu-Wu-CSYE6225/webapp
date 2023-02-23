@@ -1,0 +1,16 @@
+[Unit]
+Description=Node.js Web Application
+After=mysqld.service
+After=network.target
+
+[Service]
+Environment=PORT=5001
+Environment=NODE_ENV=production
+WorkingDirectory=/home/ec2-user/webapp
+ExecStart=/home/ec2-user/.nvm/versions/node/v16.17.1/bin/node /home/ec2-user/webapp/server.js
+Restart=always
+User=ec2-user
+Group=ec2-user
+
+[Install]
+WantedBy=multi-user.target

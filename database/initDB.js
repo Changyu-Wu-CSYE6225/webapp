@@ -1,7 +1,7 @@
 const Sequelize = require('sequelize');
 
 const sequelize = new Sequelize(
-    'csye6225-webapp',
+    'csye6225webapp',
     'root',
     'Vandark-1999',
     {
