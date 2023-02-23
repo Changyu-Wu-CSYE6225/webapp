@@ -23,14 +23,6 @@ variable "ssh_username" {
   default = "ec2-user"
 }
 
-// variable "access_key" {
-//   type = string
-// }
-
-// variable "secret_access_key" {
-//   type = string
-// }
-
 variable "ami_users" {
   type = list(string)
   default = [
@@ -48,10 +40,6 @@ source "amazon-ebs" "web_app" {
   ssh_username  = var.ssh_username
   ami_users     = var.ami_users
 
-  //   access_key = var.access_key
-  //   secret_key = var.secret_access_key
-
-
   launch_block_device_mappings {
     delete_on_termination = true
     device_name           = "/dev/sdh"
@@ -63,7 +51,6 @@ source "amazon-ebs" "web_app" {
     delay_seconds = 40
     max_attempts  = 5
   }
-
 }
 
 
