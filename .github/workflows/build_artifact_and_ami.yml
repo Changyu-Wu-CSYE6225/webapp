@@ -31,6 +31,7 @@ jobs:
         #   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         #   AWS_REGION: ${{ secrets.AWS_REGION }}
         run: |
+          packer fmt ./ami/ami.pkr.hcl
           packer init ./ami/ami.pkr.hcl
           packer validate ./ami/ami.pkr.hcl
           packer build ./ami/ami.pkr.hcl

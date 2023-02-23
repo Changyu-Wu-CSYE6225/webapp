@@ -60,9 +60,9 @@ source "amazon-ebs" "web_app" {
   }
 
   aws_polling {
-  delay_seconds = 40
-  max_attempts  = 5
-}
+    delay_seconds = 40
+    max_attempts  = 5
+  }
 
 }
 
