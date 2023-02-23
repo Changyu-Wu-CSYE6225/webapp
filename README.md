@@ -34,3 +34,12 @@ Test
 ```
 $ npm test
 ```
+
+---
+Use Packer to create an AMI
+```
+packer fmt ami.pkr.hcl && packer init ami.pkr.hcl && packer validate ami.pkr.hcl
+```
+```
+packer build ami.pkr.hcl
+```
