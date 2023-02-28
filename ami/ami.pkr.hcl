@@ -65,6 +65,7 @@ build {
   provisioner "shell" {
     scripts = [
       "./ami/setup.sh",
+      //   "./setup.sh", // Local test only
     ]
   }
 }
