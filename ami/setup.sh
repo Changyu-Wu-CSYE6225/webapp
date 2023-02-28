@@ -10,18 +10,18 @@ nvm install 16.17.1
 # node -e "console.log('Running Node.js ' + process.version)"
 
 # install mysql, setup root password, create database
-sudo yum install https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm -y
-sudo yum install mysql-community-server -y
-sudo systemctl daemon-reload
-sudo systemctl enable mysqld
-sudo systemctl start mysqld
-temp_password=$(sudo grep 'temporary password' /var/log/mysqld.log | awk '{print $NF}')
-new_password=Vandark-1999
-sudo mysql --connect-expired-password -u root -p"$temp_password" << EOF
-ALTER USER 'root'@'localhost' IDENTIFIED BY '$new_password';
-FLUSH PRIVILEGES;
-EOF
-mysql -u root -p"$new_password" -e "CREATE DATABASE csye6225webapp;"
+# sudo yum install https://dev.mysql.com/get/mysql80-community-release-el7-5.noarch.rpm -y
+# sudo yum install mysql-community-server -y
+# sudo systemctl daemon-reload
+# sudo systemctl enable mysqld
+# sudo systemctl start mysqld
+# temp_password=$(sudo grep 'temporary password' /var/log/mysqld.log | awk '{print $NF}')
+# new_password=Vandark-1999
+# sudo mysql --connect-expired-password -u root -p"$temp_password" << EOF
+# ALTER USER 'root'@'localhost' IDENTIFIED BY '$new_password';
+# FLUSH PRIVILEGES;
+# EOF
+# mysql -u root -p"$new_password" -e "CREATE DATABASE csye6225webapp;"
 
 # Update permission and file ownership
 unzip /home/ec2-user/webapp.zip -d /home/ec2-user/webapp

@@ -1,7 +1,8 @@
+# Build ami on merge
 name: build artifact and ami
 
 on:
-  pull_request:
+  push:
     branches: [main]
 
 jobs:

@@ -40,6 +40,10 @@ Use Packer to create an AMI (This part will be done in CI/CD)
 ```
 packer fmt ami.pkr.hcl && packer init ami.pkr.hcl && packer validate ami.pkr.hcl
 ```
+For dev only, before packer build
+```
+export AWS_PROFILE=dev
+```
 ```
 packer build ami.pkr.hcl
 ```
