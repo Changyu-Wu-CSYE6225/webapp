@@ -1,6 +1,17 @@
 // Product Controller
+const dotenv = require('dotenv');
 const asyncHandler = require('express-async-handler');
 const db = require('../database/initDB');
+const { S3Client, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+
+// Environment variables
+const BUCKET_NAME = process.env.S3_BUCKET_NAME;
+const BUCKET_REGION = process.env.BUCKET_REGION;
+
+// Set up S3 client
+const s3 = new S3Client({
+    region: BUCKET_REGION,
+});
 
 
 // Get a product
@@ -164,6 +175,26 @@ const patchProduct = asyncHandler(async (req, res) => {
 // Delete a product
 const deleteProduct = asyncHandler(async (req, res) => {
     const { productId } = req.params;
+
+    let rows = await db.images.findAll({
+        where: { product_id: productId },
+        raw: true,
+    });
+
+    rows.forEach(async element => {
+        const { file_name } = element;
+
+        // Delete from S3 Bucket
+        const params = {
+            Bucket: BUCKET_NAME,
+            Key: file_name,
+        };
+        await s3.send(new DeleteObjectCommand(params));
+    });
+
+
+    // Delete from database
+    await db.images.destroy({ where: { product_id: productId } });
 
     // Delete from database
     await db.products.destroy({ where: { id: productId } });
