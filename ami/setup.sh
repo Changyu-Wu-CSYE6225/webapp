@@ -39,4 +39,4 @@ npm install
 sudo cp /home/ec2-user/webapp/webapp.service /etc/systemd/system/webapp.service
 sudo systemctl daemon-reload
 sudo systemctl enable webapp.service
-sudo systemctl start webapp.service
+# sudo systemctl start webapp.service
