@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs');
 const asyncHandler = require('express-async-handler');
-const validateEmail = require('../services/authService');
+const validateEmail = require('../utils/authService');
 const db = require('../database/initDB');
 const { QueryTypes } = require('sequelize');
 

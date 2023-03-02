@@ -1,23 +1,18 @@
 // Image Controller
+const dotenv = require('dotenv');
 const asyncHandler = require('express-async-handler');
 const db = require('../database/initDB');
 const { S3Client, PutObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
-const dotenv = require('dotenv');
-const crypto = require('crypto');
+const generateRandomFileName = require('../utils/generateFileName');
+
+// Environment variables
 const BUCKET_NAME = process.env.S3_BUCKET_NAME;
+const BUCKET_REGION = process.env.BUCKET_REGION;
 
 // Set up S3 client
 const s3 = new S3Client({
-    // credentials: {
-    //     accessKeyId: 'AKIA6LBY2VQXVEBPIHHR',
-    //     secretAccessKey: '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',
-    // },
-    region: process.env.BUCKET_REGION || 'us-east-1',
+    region: BUCKET_REGION || 'us-east-1',
 });
-
-
-// Generate file name
-const generateRandomFileName = () => crypto.randomBytes(16).toString('hex');
 
 
 // Get all images
@@ -49,7 +44,7 @@ const uploadImage = asyncHandler(async (req, res) => {
     // Validation
     if (file === undefined) {
         res.status(400);
-        throw new Error("File and file_name are required");
+        throw new Error("File is required");
     }
 
     // Store in S3

@@ -23,15 +23,8 @@ app.use('/v1/product', imageRouter);
 
 app.use(errorHandler);
 
-
-console.log(process.env.S3_BUCKET_NAME);
-console.log(process.env.DB_HOSTNAME);
-console.log(process.env.DB_USERNAME);
-console.log(process.env.DB_PASSWORD);
-
 // Connect to database and port
 const PORT = process.env.PORT || 5001;
-// const PORT = process.env.NODE_ENV === 'production' ? 'systemd' : 5001;
 const DROP_AND_SYNC = process.env.NODE_ENV === 'development' ? false : true;
 db.sequelize.sync({ force: DROP_AND_SYNC })     // Set to false only on development environment
     .then(() => {
