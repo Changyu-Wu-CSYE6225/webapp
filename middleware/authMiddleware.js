@@ -101,7 +101,84 @@ const protectProduct = asyncHandler(async (req, res, next) => {
     next();
 });
 
+
+
+// Base64 Authorization - Require a User Authorization before Product Controller
+const protectProductImage = asyncHandler(async (req, res, next) => {
+    // Check authorization info
+    if (!req.headers.authorization) {
+        res.status(401);
+        throw new Error("Unauthorized. Please provide WWW-Authorization");
+    }
+
+    const encoded = req.headers.authorization.split(' ')[1];        // Extract Base64 auth
+    const decoded = Buffer.from(encoded, 'base64').toString();      // Decode auth. Default: UTF-8
+    const auth_username = decoded.split(':')[0];
+    const auth_password = decoded.split(':')[1];
+
+    // Check User info in the database
+    let rows = await db.users.findOne({
+        where: { username: auth_username },
+        raw: true,      // Disable wrapping 
+    });
+    if (rows === null) {    // User Validation
+        res.status(401);
+        throw new Error("Unauthenticated. User not found");
+    }
+    if (!await bcrypt.compare(auth_password, rows.password)) {  // Password Validation
+        res.status(401);
+        throw new Error("Unauthenticated. Password not match");
+    }
+
+
+    // Product Permission check
+    const userId = rows.id;
+    const { product_id, image_id } = req.params;
+
+    // Check Product Existence
+    rows = await db.products.findOne({ where: { id: product_id } });
+    if (rows === null) {
+        res.status(404);
+        throw new Error("Product not found");
+    }
+
+    // Check Permission (User only has the access to their products)
+    rows = await db.sequelize.query("SELECT * FROM `Products` WHERE `id` = ? AND `owner_user_id` = ?",
+        {
+            replacements: [product_id, userId],
+            type: QueryTypes.SELECT,
+        },
+    );
+    if (Object.keys(rows).length <= 0) {
+        res.status(403);
+        throw new Error("User id is not matched with this product. Product is not created by this user");
+    }
+
+    // Check Image Existence
+    if (image_id) {
+        rows = await db.sequelize.query("SELECT * FROM `Images` WHERE `product_id` = ? AND `image_id` = ?",
+            {
+                replacements: [product_id, image_id],
+                type: QueryTypes.SELECT,
+            },
+        );
+
+        if (Object.keys(rows).length === 0) {
+            res.status(404);
+            throw new Error("Image not found");
+        }
+
+        // Pass to next as a parameter
+        req.rows = rows;        // Image info
+    }
+
+    // req.userId = userId;
+
+    next();
+});
+
 module.exports = {
     protectUser,
     protectProduct,
+    protectProductImage,
 };
