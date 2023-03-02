@@ -2,8 +2,7 @@
 name: build artifact and ami
 
 on:
-  # push:
-  pull_request:
+  push:
     branches: [main]
 
 jobs:
