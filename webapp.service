@@ -1,6 +1,7 @@
 [Unit]
 Description=Node.js Web Application
 After=network.target
+After=amazon-ssm-agent.service
 
 [Service]
 WorkingDirectory=/home/ec2-user/webapp
