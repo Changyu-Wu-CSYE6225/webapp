@@ -2,6 +2,7 @@ const dotenv = require("dotenv").config();      // Load .env file
 const express = require('express');
 const userRouter = require('./routes/userRoute');
 const productRouter = require('./routes/productRoute');
+const imageRouter = require('./routes/imageRoute');
 const errorHandler = require('./middleware/errorMiddleware');
 const db = require("./database/initDB");
 require('systemd');
@@ -18,6 +19,7 @@ app.use(express.json());
 app.get('/healthz', (req, res) => res.send('Healthy Server'));
 app.use('/v1/user', userRouter);
 app.use('/v1/product', productRouter);
+app.use('/v1/product', imageRouter);
 
 app.use(errorHandler);
 
@@ -34,6 +36,7 @@ db.sequelize.sync({ force: DROP_AND_SYNC })     // Set to false only on developm
         });
     })
     .catch((err) => {
+        console.log(err);
         console.log("Connect to database failed");
     });
 

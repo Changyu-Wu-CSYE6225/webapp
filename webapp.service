@@ -1,7 +1,7 @@
 [Unit]
 Description=Node.js Web Application
-After=mysqld.service
 After=network.target
+After=mysqld.service
 
 [Service]
 Environment=PORT=5001
