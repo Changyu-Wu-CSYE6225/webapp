@@ -3,7 +3,7 @@ const Sequelize = require('sequelize');
 const sequelize = new Sequelize(
     `csye6225`,
     // 'csye6225webapp',
-    `${process.env.DB_USERNAME}` || 'csye6225',
+    `${process.env.DB_USERNAME}`,
     // 'root',
     `${process.env.DB_PASSWORD}`,
     {
