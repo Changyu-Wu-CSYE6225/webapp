@@ -11,7 +11,7 @@ const BUCKET_REGION = process.env.BUCKET_REGION;
 
 // Set up S3 client
 const s3 = new S3Client({
-    region: BUCKET_REGION || 'us-east-1',
+    region: BUCKET_REGION,
 });
 
 

@@ -3,14 +3,9 @@ Description=Node.js Web Application
 After=network.target
 
 [Service]
-Environment=PORT=5001
-Environment=NODE_ENV=production
-Environment=DB_USERNAME=${DB_USERNAME}
-Environment=DB_PASSWORD=${DB_PASSWORD}
-Environment=DB_HOSTNAME=${DB_HOSTNAME}
-Environment=S3_BUCKET_NAME=${S3_BUCKET_NAME}
 WorkingDirectory=/home/ec2-user/webapp
 ExecStart=/home/ec2-user/.nvm/versions/node/v16.17.1/bin/node /home/ec2-user/webapp/server.js
+ExecStart=/home/ec2-user/webapp/.env
 Restart=always
 User=ec2-user
 Group=ec2-user

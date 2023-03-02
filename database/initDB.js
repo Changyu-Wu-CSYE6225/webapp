@@ -4,7 +4,6 @@ const sequelize = new Sequelize(
     `csye6225`,
     // 'csye6225webapp',
     `${process.env.DB_USERNAME}`,
-    // 'root',
     `${process.env.DB_PASSWORD}`,
     {
         host: `${process.env.DB_HOSTNAME}`,
