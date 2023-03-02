@@ -2,7 +2,6 @@ const Sequelize = require('sequelize');
 
 const sequelize = new Sequelize(
     `csye6225`,
-    // 'csye6225webapp',
     `${process.env.DB_USERNAME}`,
     `${process.env.DB_PASSWORD}`,
     {
