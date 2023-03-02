@@ -47,6 +47,7 @@ const uploadImage = asyncHandler(async (req, res) => {
         throw new Error("File is required");
     }
 
+    console.log(file_name);
     // Store in S3
     const params = {
         Bucket: BUCKET_NAME,
