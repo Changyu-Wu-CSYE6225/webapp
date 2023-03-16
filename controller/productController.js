@@ -42,7 +42,7 @@ const createProduct = asyncHandler(async (req, res) => {
     const { name, description, sku, manufacturer, quantity } = req.body;
 
     // Validation
-    if (!name || !description || !sku || !manufacturer || !quantity) {
+    if (!name || !description || !sku || !manufacturer || quantity === null) {
         res.status(400);
         throw new Error("Please add all required fields");
     }
@@ -89,7 +89,7 @@ const updateProduct = asyncHandler(async (req, res) => {
 
 
     // Validation
-    if (!name || !description || !sku || !manufacturer || !quantity) {
+    if (!name || !description || !sku || !manufacturer || quantity === null) {
         res.status(400);
         throw new Error("Please add all required fields");
     }
@@ -132,7 +132,7 @@ const patchProduct = asyncHandler(async (req, res) => {
     let { name, description, sku, manufacturer, quantity } = req.body;
 
     // Validation
-    if (!name && !description && !sku && !manufacturer && !quantity) {
+    if (!name && !description && !sku && !manufacturer && quantity === null) {
         res.status(400);
         throw new Error("Please add at least one field");
     }
