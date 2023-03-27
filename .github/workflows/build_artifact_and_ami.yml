@@ -30,7 +30,7 @@ jobs:
         run: |
           packer fmt ./ami/ami.pkr.hcl
           packer init ./ami/ami.pkr.hcl
-          packer validate ./ami/ami.pkr.hcl
-          packer build ./ami/ami.pkr.hcl
+          packer validate -var-file="./ami/ami.pkrvars.hcl" ./ami/ami.pkr.hcl
+          packer build -var-file="./ami/ami.pkrvars.hcl" ./ami/ami.pkr.hcl
         env:
           PACKER_LOG: 1 # enable debug log for packer

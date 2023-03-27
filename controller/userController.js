@@ -3,16 +3,22 @@ const asyncHandler = require('express-async-handler');
 const validateEmail = require('../utils/authService');
 const db = require('../database/initDB');
 const { QueryTypes } = require('sequelize');
+const logger = require('../logger/configLogger');
+const metricsClient = require("../logger/configMetrics");
 
 
 // Create a user account
 const createUser = asyncHandler(async (req, res) => {
+    const startTime = new Date();
+    metricsClient.increment('endpoint.v1.user.post');   // Count API calls
+    logger.info("Creating a new user...");
+
     const { first_name, last_name, password, username } = req.body;
 
     // Field validation
     if (!first_name || !last_name || !password || !username) {
         res.status(400);
-        throw new Error("Please add all required fields");
+        throw new Error("Please add all required fields - first name, last name, password and username");
     }
 
     // Email validation
@@ -49,18 +55,25 @@ const createUser = asyncHandler(async (req, res) => {
     // [rows, fields] = await db.query("INSERT INTO User (`first_name`, `last_name`, `password`, `username`, `account_created`, `account_updated`) VALUES (?,?,?,?,?,?)",
     //     [first_name, last_name, savedPassword, username, account_created, account_updated]);
 
-
     // Response
+    logger.info("Create a new user succeed");
     const { id, account_created, account_updated } = rows.dataValues;
     res.status(201).json({
         id, first_name, last_name, username, account_created, account_updated,
     });
+
+    // Timer
+    const endTime = new Date();
+    metricsClient.timing('duration.v1.user.post', endTime - startTime);
 });
 
 
 
 // Get user account information
 const getUser = asyncHandler(async (req, res) => {
+    metricsClient.increment('endpoint.v1.user.get');    // Count API calls
+    logger.info("Getting user information...");
+
     // Extract userId from request parameters
     const { userId } = req.params;
 
@@ -75,16 +88,23 @@ const getUser = asyncHandler(async (req, res) => {
     // const [rows, fields] = await db.query("SELECT `id`, `first_name`, `last_name`, `username`, `account_created`, `account_updated` FROM User WHERE `id` = ?", [userId]);
 
     // Response
+    logger.info("Get user information succeed");
     const { id, first_name, last_name, username, account_created, account_updated } = rows[0];
     res.status(200).json({
         id, first_name, last_name, username, account_created, account_updated
     });
+
+    // Timer
+    metricsClient.timing('duration.v1.user.get', new Date() - req.startTime);
 });
 
 
 
 // Update user account information
 const updateUser = asyncHandler(async (req, res) => {
+    metricsClient.increment('endpoint.v1.user.put');    // Count API calls
+    logger.info("Updating user information...");
+
     const { userId } = req.params;
 
     // Field validation
@@ -121,7 +141,11 @@ const updateUser = asyncHandler(async (req, res) => {
     //     [first_name, last_name, savedPassword, account_updated, userId]);
 
     // Response
+    logger.info("Update user information succeed");
     res.status(204).json();
+
+    // Timer
+    metricsClient.timing('duration.v1.user.put', new Date() - req.startTime);
 });
 
 

@@ -24,11 +24,8 @@ variable "ssh_username" {
 }
 
 variable "ami_users" {
-  type = list(string)
-  default = [
-    "985814182959",
-    "005613189821",
-  ]
+  type    = list(string)
+  default = []
 }
 
 

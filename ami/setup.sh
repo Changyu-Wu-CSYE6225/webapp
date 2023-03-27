@@ -18,7 +18,7 @@ sudo yum install mysql -y
 # sudo systemctl enable mysqld
 # sudo systemctl start mysqld
 # temp_password=$(sudo grep 'temporary password' /var/log/mysqld.log | awk '{print $NF}')
-# new_password=Vandark-1999
+# new_password=abcd
 # sudo mysql --connect-expired-password -u root -p"$temp_password" << EOF
 # ALTER USER 'root'@'localhost' IDENTIFIED BY '$new_password';
 # FLUSH PRIVILEGES;
@@ -35,8 +35,13 @@ chmod -R 755 /home/ec2-user/webapp
 cd /home/ec2-user/webapp/ || exit
 npm install
 
+# Install Cloudwatch agent
+sudo yum install amazon-cloudwatch-agent -y
+# Config Cloudwatch agent
+# Amazon-cloudwatch-agent is enabled automatically by ec2 instance
+sudo /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -c file:/home/ec2-user/webapp/autorun/cloudwatch_config.json -s
+
 # Set up autorun using Systemd
-sudo cp /home/ec2-user/webapp/webapp.service /etc/systemd/system/webapp.service
+sudo cp /home/ec2-user/webapp/autorun/webapp.service /etc/systemd/system/webapp.service
 sudo systemctl daemon-reload
 sudo systemctl enable webapp.service
-# sudo systemctl start webapp.service
