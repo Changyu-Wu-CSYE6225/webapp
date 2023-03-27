@@ -3,6 +3,9 @@ const dotenv = require('dotenv');
 const asyncHandler = require('express-async-handler');
 const db = require('../database/initDB');
 const { S3Client, DeleteObjectCommand } = require('@aws-sdk/client-s3');
+const logger = require('../logger/configLogger');
+const metricsClient = require("../logger/configMetrics");
+
 
 // Environment variables
 const BUCKET_NAME = process.env.S3_BUCKET_NAME;
@@ -16,6 +19,10 @@ const s3 = new S3Client({
 
 // Get a product
 const getProduct = asyncHandler(async (req, res) => {
+    const startTime = new Date();
+    metricsClient.increment('endpoint.v1.product.get');     // Count API calls
+    logger.info("Getting product information...");
+
     const { productId } = req.params;
 
     // Query from database
@@ -29,22 +36,29 @@ const getProduct = asyncHandler(async (req, res) => {
         throw new Error("Product not found");
     }
 
-
     // Succeed
+    logger.info("Get product information succeed");
     res.status(200).json(rows);
+
+    // Timer
+    const endTime = new Date();
+    metricsClient.timing('duration.v1.product.get', endTime - startTime);
 });
 
 
 
 // Create a new product
 const createProduct = asyncHandler(async (req, res) => {
+    metricsClient.increment('endpoint.v1.product.post');    // Count API calls
+    logger.info("Creating a new product...");
+
     // Get inputs
     const { name, description, sku, manufacturer, quantity } = req.body;
 
     // Validation
     if (!name || !description || !sku || !manufacturer || quantity === null) {
         res.status(400);
-        throw new Error("Please add all required fields");
+        throw new Error("Please add all required fields - name, description, sku, manufacturer and quantity");
     }
 
     // Check sku uniqueness
@@ -74,13 +88,20 @@ const createProduct = asyncHandler(async (req, res) => {
 
 
     // Succeed
+    logger.info("Create a new product succeed");
     res.status(201).json(rows.toJSON());
+
+    // Timer
+    metricsClient.timing('duration.v1.product.post', new Date() - req.startTime);
 });
 
 
 
 // Update a Product with Put
 const updateProduct = asyncHandler(async (req, res) => {
+    metricsClient.increment('endpoint.v1.product.put');     // Count API calls
+    logger.info("Updating product information...");
+
     const { productId } = req.params;
     let rows = req.rows;
 
@@ -91,7 +112,7 @@ const updateProduct = asyncHandler(async (req, res) => {
     // Validation
     if (!name || !description || !sku || !manufacturer || quantity === null) {
         res.status(400);
-        throw new Error("Please add all required fields");
+        throw new Error("Please add all required fields - name, description, sku, manufacturer and quantity");
     }
 
     // Check sku uniqueness
@@ -118,13 +139,20 @@ const updateProduct = asyncHandler(async (req, res) => {
 
 
     // Succeed
+    logger.info("Update product information succeed");
     res.status(204).json();
+
+    // Timer
+    metricsClient.timing('duration.v1.product.put', new Date() - req.startTime);
 });
 
 
 
 // Update a Product with Patch
 const patchProduct = asyncHandler(async (req, res) => {
+    metricsClient.increment('endpoint.v1.product.patch');       // Count API calls
+    logger.info("Patching product information...");
+
     const { productId } = req.params;
     let rows = req.rows;
 
@@ -134,7 +162,7 @@ const patchProduct = asyncHandler(async (req, res) => {
     // Validation
     if (!name && !description && !sku && !manufacturer && quantity === null) {
         res.status(400);
-        throw new Error("Please add at least one field");
+        throw new Error("Please add at least one field - name, description, sku, manufacturer or quantity");
     }
 
     // Check sku uniqueness
@@ -167,13 +195,20 @@ const patchProduct = asyncHandler(async (req, res) => {
 
 
     // Succeed
+    logger.info("Patch product information succeed");
     res.status(204).json();
+
+    // Timer
+    metricsClient.timing('duration.v1.product.patch', new Date() - req.startTime);
 });
 
 
 
 // Delete a product
 const deleteProduct = asyncHandler(async (req, res) => {
+    metricsClient.increment('endpoint.v1.product.delete');      // Count API calls
+    logger.info("Deleting a product...");
+
     const { productId } = req.params;
 
     let rows = await db.images.findAll({
@@ -181,6 +216,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
         raw: true,
     });
 
+    logger.info("Deleting product images in S3 bucket...");
     rows.forEach(async element => {
         const { file_name } = element;
 
@@ -195,12 +231,15 @@ const deleteProduct = asyncHandler(async (req, res) => {
 
     // Delete from database
     await db.images.destroy({ where: { product_id: productId } });
-
-    // Delete from database
     await db.products.destroy({ where: { id: productId } });
 
+
     // Succeed
+    logger.info("Delete a product succeed");
     res.status(204).json();
+
+    // Timer
+    metricsClient.timing('duration.v1.product.delete', new Date() - req.startTime);
 });
 
 

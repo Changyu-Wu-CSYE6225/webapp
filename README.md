@@ -35,15 +35,23 @@ Test
 npm test
 ```
 
+***
+Packer
 ---
 Use Packer to create an AMI (This part will be done in CI/CD)
 ```
-packer fmt ami.pkr.hcl && packer init ami.pkr.hcl && packer validate ami.pkr.hcl
+packer fmt ami.pkr.hcl && packer init ami.pkr.hcl && packer validate -var-file="ami.pkrvars.hcl" ami.pkr.hcl
 ```
 For dev only, before packer build
 ```
 export AWS_PROFILE=dev
 ```
 ```
-packer build ami.pkr.hcl
+packer build -var-file="ami.pkrvars.hcl" ami.pkr.hcl
 ```
+
+***
+Logger & Metrics
+---
+Winston to create log info
+StatsD to record metrics. The dependency is node-statsd

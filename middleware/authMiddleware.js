@@ -2,10 +2,14 @@ const asyncHandler = require('express-async-handler');
 const bcrypt = require('bcryptjs');
 const db = require('../database/initDB');
 const { QueryTypes } = require('sequelize');
+const logger = require("../logger/configLogger");
 
 
 // Base64 Authorization - User Authorization for Get and Put Users
 const protectUser = asyncHandler(async (req, res, next) => {
+    const startTime = new Date();
+    logger.info("Checking user authorization status...");
+
     // Check authorization info
     if (!req.headers.authorization) {
         res.status(401);
@@ -37,6 +41,8 @@ const protectUser = asyncHandler(async (req, res, next) => {
         throw new Error("Unauthorized. User id not match");
     }
 
+    req.startTime = startTime;
+    logger.info("User authorized");
     next();
 });
 
@@ -44,6 +50,9 @@ const protectUser = asyncHandler(async (req, res, next) => {
 
 // Base64 Authorization - Require a User Authorization before Product Controller
 const protectProduct = asyncHandler(async (req, res, next) => {
+    const startTime = new Date();
+    logger.info("Checking user authorization status...");
+
     // Check authorization info
     if (!req.headers.authorization) {
         res.status(401);
@@ -68,9 +77,11 @@ const protectProduct = asyncHandler(async (req, res, next) => {
         res.status(401);
         throw new Error("Unauthenticated. Password not match");
     }
+    logger.info("User authorized");
 
 
     // Product Permission check (if params contain productId)
+    logger.info("Checking product authorization status...");
     const userId = rows.id;
     const { productId } = req.params;
     if (productId) {
@@ -95,9 +106,11 @@ const protectProduct = asyncHandler(async (req, res, next) => {
     }
 
     // Pass to next as a parameter
+    req.startTime = startTime;
     req.userId = userId;
     req.rows = rows;
 
+    logger.info("Product authorized");
     next();
 });
 
@@ -105,6 +118,9 @@ const protectProduct = asyncHandler(async (req, res, next) => {
 
 // Base64 Authorization - Require a User Authorization before Product Controller
 const protectProductImage = asyncHandler(async (req, res, next) => {
+    const startTime = new Date();
+    logger.info("Checking user authorization status...");
+
     // Check authorization info
     if (!req.headers.authorization) {
         res.status(401);
@@ -129,9 +145,11 @@ const protectProductImage = asyncHandler(async (req, res, next) => {
         res.status(401);
         throw new Error("Unauthenticated. Password not match");
     }
+    logger.info("User authorized");
 
 
     // Product Permission check
+    logger.info("Checking product authorization status...");
     const userId = rows.id;
     const { product_id, image_id } = req.params;
 
@@ -153,9 +171,13 @@ const protectProductImage = asyncHandler(async (req, res, next) => {
         res.status(403);
         throw new Error("User id is not matched with this product. Product is not created by this user");
     }
+    logger.info("Product authorized");
+
 
     // Check Image Existence
+    logger.info("Checking Image authorization status...");
     if (image_id) {
+        logger.info("Getting an image...");
         rows = await db.sequelize.query("SELECT * FROM `Images` WHERE `product_id` = ? AND `image_id` = ?",
             {
                 replacements: [product_id, image_id],
@@ -173,7 +195,9 @@ const protectProductImage = asyncHandler(async (req, res, next) => {
     }
 
     // req.userId = userId;
+    req.startTime = startTime;
 
+    logger.info("Image authorized");
     next();
 });
 
