@@ -16,6 +16,13 @@ const BUCKET_REGION = process.env.BUCKET_REGION;
 const s3 = new S3Client({
     region: BUCKET_REGION,
 });
+// const s3 = new S3Client({
+//     credentials: {
+//         accessKeyId: process.env.ACCESS_KEY,
+//         secretAccessKey: process.env.SECRET_ACCESS_KEY,
+//     },
+//     region: BUCKET_REGION,
+// });
 
 
 // Get all images
@@ -52,7 +59,7 @@ const uploadImage = asyncHandler(async (req, res) => {
 
     const { product_id } = req.params;
     const file = req.file;
-    const file_name = generateRandomFileName();
+    const file_name = file.originalname + '#' + generateRandomFileName();       // OriginalName#GeneratedName
 
     // Validation
     if (file === undefined) {
@@ -80,6 +87,7 @@ const uploadImage = asyncHandler(async (req, res) => {
     await s3.send(command);
 
     // Store in MySQL
+    logger.info("Storing image info in MySQL");
     await db.images.create({
         product_id,
         file_name,
@@ -91,6 +99,7 @@ const uploadImage = asyncHandler(async (req, res) => {
         where: { file_name },
         raw: true,
     });
+    rows.file_name = rows.file_name.split('#')[0];
 
     logger.info("Upload an image succeed");
     res.status(201).json(rows);
@@ -130,6 +139,7 @@ const deleteImage = asyncHandler(async (req, res) => {
     await s3.send(new DeleteObjectCommand(params));
 
     // Delete from database
+    logger.info("Deleting image info from MySQL...");
     await db.images.destroy({ where: { product_id, image_id } });
 
     logger.info("Delete an image succeed");
