@@ -1,4 +1,4 @@
-# webapp instructor
+# Webapp instructor
 
 ### This application is built with JavaScript (Node.js + Express.js) and tested with Jest.
 ***
