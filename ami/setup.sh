@@ -29,7 +29,7 @@ sudo yum install mysql -y
 unzip /home/ec2-user/webapp.zip -d /home/ec2-user/webapp
 rm -rf /home/ec2-user/webapp.zip
 chown -R ec2-user:ec2-user /home/ec2-user/webapp
-chmod -R 755 /home/ec2-user/webapp
+chmod -R 775 /home/ec2-user/webapp
 
 # Install dependencies
 cd /home/ec2-user/webapp/ || exit
