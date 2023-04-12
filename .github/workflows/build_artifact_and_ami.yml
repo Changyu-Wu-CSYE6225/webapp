@@ -48,17 +48,29 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_DEMO }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_DEMO }}
+          aws-region: ${{ secrets.AWS_REGION }}
       # Get the latest AMI id and aws_launch_template id; Create new aws_launch_template version
       - name: Update aws_launch_template version
         run: |
+          launch_template_names=asg_launch_config
           ami_id=$(aws ec2 describe-images --owners 985814182959 --query 'reverse(sort_by(Images, &CreationDate))[0].ImageId' --output text)
-          launch_template_id=$(aws ec2 describe-launch-templates --launch-template-names asg_launch_config --query 'LaunchTemplates[0].LaunchTemplateId' --output text)
+          launch_template_id=$(aws ec2 describe-launch-templates --launch-template-names $launch_template_names --query 'LaunchTemplates[0].LaunchTemplateId' --output text)
           aws ec2 create-launch-template-version \
               --launch-template-id $launch_template_id \
               --version-description webapp_v2 \
               --source-version 1 \
               --launch-template-data "ImageId=$ami_id"
-
-# update autoscaling group with latest aws_launch_template version
-
-# refresh autoscaling group
+      # Auto Scaling Group - Update and Refresh
+      - name: Update autoscaling group with latest aws_launch_template version
+        run: |
+          auto_scaling_group_name=autoscaling_group
+          aws autoscaling update-auto-scaling-group \
+            --auto-scaling-group-name $auto_scaling_group_name \
+            --launch-template LaunchTemplateName=$launch_template_names, Version=$(
+                aws ec2 describe-launch-template-versions \
+                    --launch-template-name $launch_template_names \
+                    --query 'reverse(sort_by(LaunchTemplateVersions, &VersionNumber))[0].VersionNumber' --output text
+                )
+          aws autoscaling start-instance-refresh \
+            --auto-scaling-group-name $auto_scaling_group_name \
+            --preferences MinHealthyPercentage=50
