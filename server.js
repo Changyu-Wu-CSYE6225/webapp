@@ -29,20 +29,20 @@ app.get('/healthz', (req, res) => {
     metricsClient.timing('duration.endpoint.healthz.get', endTime - startTime);
 });
 
-app.get('/health', (req, res) => {
-    const startTime = new Date();
-    metricsClient.increment("endpoint.health.get");    // Count API calls
-    logger.info("Connect to server succeed");
+// app.get('/health', (req, res) => {
+//     const startTime = new Date();
+//     metricsClient.increment("endpoint.health.get");    // Count API calls
+//     logger.info("Connect to server succeed");
 
-    res.send('Healthy Server');
+//     res.send('Healthy Server');
 
-    // Timer
-    const endTime = new Date();
-    metricsClient.timing('duration.endpoint.health.get', endTime - startTime);
-});
+//     // Timer
+//     const endTime = new Date();
+//     metricsClient.timing('duration.endpoint.health.get', endTime - startTime);
+// });
 
 // Change version
-const publish_version = 'v2';
+const publish_version = 'v1';
 app.use(`/${publish_version}/user`, userRouter);
 app.use(`/${publish_version}/product`, productRouter);
 app.use(`/${publish_version}/product`, imageRouter);
