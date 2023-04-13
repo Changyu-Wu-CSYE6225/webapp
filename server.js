@@ -17,7 +17,7 @@ app.use(express.json());
 // app.use(cors());
 
 // Routes
-app.get('/health', (req, res) => {
+app.get('/healthz', (req, res) => {
     const startTime = new Date();
     metricsClient.increment("endpoint.healthz.get");    // Count API calls
     logger.info("Connect to server succeed");
@@ -27,6 +27,18 @@ app.get('/health', (req, res) => {
     // Timer
     const endTime = new Date();
     metricsClient.timing('duration.endpoint.healthz.get', endTime - startTime);
+});
+
+app.get('/health', (req, res) => {
+    const startTime = new Date();
+    metricsClient.increment("endpoint.health.get");    // Count API calls
+    logger.info("Connect to server succeed");
+
+    res.send('Healthy Server');
+
+    // Timer
+    const endTime = new Date();
+    metricsClient.timing('duration.endpoint.health.get', endTime - startTime);
 });
 
 const publish_version = 'v2';
