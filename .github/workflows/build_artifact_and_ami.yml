@@ -60,17 +60,18 @@ jobs:
               --version-description webapp_v2 \
               --source-version 1 \
               --launch-template-data "ImageId=$ami_id"
-      # Auto Scaling Group - Update and Refresh
-      - name: Update autoscaling group with latest aws_launch_template version
-        run: |
+
+          # Update Auto Scaling group with latest aws_launch_template version
           auto_scaling_group_name=autoscaling_group
           aws autoscaling update-auto-scaling-group \
             --auto-scaling-group-name $auto_scaling_group_name \
-            --launch-template LaunchTemplateName=$launch_template_names, Version=$(
+            --launch-template LaunchTemplateName=$launch_template_names,Version=$(
                 aws ec2 describe-launch-template-versions \
                     --launch-template-name $launch_template_names \
-                    --query 'reverse(sort_by(LaunchTemplateVersions, &VersionNumber))[0].VersionNumber' --output text
+                    --query 'reverse(sort_by(LaunchTemplateVersions, &VersionNumber))[0].VersionNumber'
                 )
+                
+          # Refresh instance
           aws autoscaling start-instance-refresh \
             --auto-scaling-group-name $auto_scaling_group_name \
             --preferences MinHealthyPercentage=50
