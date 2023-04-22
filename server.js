@@ -42,7 +42,7 @@ app.get('/healthz', (req, res) => {
 // });
 
 // Change version
-const publish_version = 'v1';
+const publish_version = 'v2';
 app.use(`/${publish_version}/user`, userRouter);
 app.use(`/${publish_version}/product`, productRouter);
 app.use(`/${publish_version}/product`, imageRouter);
